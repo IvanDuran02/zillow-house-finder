@@ -1,0 +1,22 @@
+{
+  "name": "zillow-house-finder",
+  "version": "1.0.0",
+  "description": "A scraper that searches Zillow.com for house listings",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@types/cheerio": "^0.22.31",
+    "axios": "^0.27.2",
+    "cheerio": "^1.0.0-rc.12",
+    "nodemon": "^2.0.19",
+    "ts-node": "^10.9.1"
+  }
+}
