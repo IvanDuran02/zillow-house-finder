@@ -1,24 +1,27 @@
 import * as cheerio from "cheerio";
-import axios from "axios";
 
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 const locations = [
-  "miami",
-  "pensacola",
-  "dallas",
-  "austin",
-  "houston",
-  "san antonio",
-  "palm-beach",
-  "las-vegas",
-  "las-angeles",
-  "san-fran",
-  "toronto",
-  "brampton",
-  "montreal",
+  "ottawa",
+  "vancouver",
+  "detroit",
+  "compton",
+  "seattle",
+  "chicago",
+  "washington",
+  "new-york",
+  "boston",
+  "new-orleans",
+  "philadelphia",
+  "phoenix",
+  "san-diego",
+  "san-jose",
+  "oakland",
+  "san-jose",
+  "salt-lake-city",
 ];
 
 const formatAddr = (data: any, i: number) => {
@@ -43,13 +46,13 @@ async function getProperty(location: string) {
   console.log("Script Starting...");
 
   const url = `https://www.zillow.com/homes/${location}`;
-  const response = await axios(url); // fetch the page
-  const body = await response.data; // get the body of the page (source HTML)
+  const response = await fetch(url); // fetch the page
+  const body = await response.text(); // get the body of the page (source HTML)
   const $ = cheerio.load(body); // load the HTML into cheerio
   const data: any = [];
   const formatted: any = [];
   const links: any = [];
-  // const images: any = [];
+  const images: any = [];
 
   console.log(body);
 
@@ -87,16 +90,17 @@ async function getProperty(location: string) {
     (property: any, index: number) => (property.link = links[index])
   ); // merges the links into the data array
 
-  // data.forEach(async (property: any, index: number) => {
-  //   const fetchImageUrl = await fetch(property.link);
-  //   const imgBody = await fetchImageUrl.text(); // get the body of the page (source HTML)
-  //   const $$ = cheerio.load(imgBody); // load the HTML into cheerio
-  //   $$(".media-column-container")
-  //     .find("img")
-  //     .each((i, element) => {
-  //       console.log($(element).attr("src"));
-  //     });
-  // });
+  data.forEach(async (property: any, index: number) => {
+    const fetchImageUrl = await fetch(property.link);
+    const imgBody = await fetchImageUrl.text(); // get the body of the page (source HTML)
+    const $$ = cheerio.load(imgBody); // load the HTML into cheerio
+    $$(".media-column-container")
+      .find("img")
+      .each((i, element) => {
+        return images.push($(element).attr("src"));
+      });
+  });
+
   async function main() {
     // ... you will write your Prisma Client queries here
     data.forEach(async (property: any, index: number) => {
@@ -112,6 +116,24 @@ async function getProperty(location: string) {
           })
           .then(() => {
             console.log(`Property ${index} created`);
+          });
+        await prisma.property
+          .findMany({
+            where: {
+              zpid: property.zpid,
+            },
+          })
+          .then(async (property: any) => {
+            try {
+              await prisma.images.create({
+                data: {
+                  imageURL: images[index],
+                  propertyID: property.id,
+                },
+              });
+            } catch (error) {
+              console.log(error);
+            }
           });
       } catch (error) {
         console.log(error);
@@ -132,9 +154,30 @@ async function getProperty(location: string) {
 
   return data;
 }
-for (let i = 0; i < locations.length; i++) {
-  getProperty(locations[i]);
-}
+
+// const testFunction = async () => {
+//   try {
+//     await prisma.images
+//       .create({
+//         data: {
+//           imageURL:
+//             "https://www.zillow.com/homedetails/1234-5678-9012-3456_zpid/1234-5678-9012-3456_zpid/images/fb.jp",
+//           propertyID: 82,
+//         },
+//       })
+//       .then(() => {
+//         console.log("Image Created");
+//       });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+// testFunction();
+
+// for (let i = 0; i < locations.length; i++) {
+//   getProperty(locations[i]);
+// }
 
 // sample data
 

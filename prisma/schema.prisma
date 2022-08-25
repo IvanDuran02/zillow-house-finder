@@ -10,11 +10,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model Property { 
   id          Int @id @default(autoincrement())
   address     String
   price       String
   zpid        String @unique
-  link       String
-
+  link        String
+  image       Images[]
 }
+
+model Images {
+  id          Int @id @default(autoincrement())
+  image       Property @relation(fields: [propertyID], references: [id])
+  propertyID     Int
+  imageURL    String @unique
+}
+
+
