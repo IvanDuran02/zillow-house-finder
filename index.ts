@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio";
 
 import { PrismaClient } from "@prisma/client";
+import { parse } from "path";
 
 const prisma = new PrismaClient();
 
@@ -62,14 +63,13 @@ async function getProperty(location: string) {
 
   $(".list-card").each((i, element) => {
     const address = $(element).find(".list-card-addr").text();
-    const price = $(element).find(".list-card-price").text();
+    const priceTemp = $(element).find(".list-card-price").text();
     const zpid = $(element).attr("id");
     // turns price into a number
-    if (price.startsWith("$")) {
-      price.replace("$", "");
-    } else if (price.startsWith("C$")) {
-      price.replace("C$", "");
-    }
+    const price1 = priceTemp.replace(/\$/g, "");
+    const price2 = price1.replace(/\,/g, "");
+    const price3 = price2.replace(/\C/g, "");
+    const price = parseInt(price3);
     data.push({ address, price, zpid });
   });
   data.pop(); // remove the last element of the array, for some reason last element is empty
@@ -163,15 +163,8 @@ async function getProperty(location: string) {
 
 // const testFunction = async () => {
 //   try {
-//     await prisma.property
-//       .findMany({
-//         where: {
-//           zpid: "zpid_15170887",
-//         },
-//       })
-//       .then((property: any) => {
-//         console.log(property[0].id);
-//       });
+//     const temp = await prisma.property.findMany({});
+//     console.log(temp);
 //   } catch (error) {
 //     console.log(error);
 //   }
@@ -179,27 +172,29 @@ async function getProperty(location: string) {
 
 // testFunction();
 
-getProperty(locations[24]);
+for (let i = 0; i < locations.length; i++) {
+  getProperty(locations[i]);
+}
 
 // sample data
 
-// const data = [
-//   {
-//     address: "14944 SW 132nd Ave, Miami, FL 33186",
-//     price: "$899,000",
-//     link: "https://www.zillow.com/homedetails/495-Brickell-Ave-APT-2511-Miami-FL-33131/92440680_zpid",
-//     zpid: "zpid_44331199",
-//   },
-//   {
-//     address: "801 NW 17th Ct, Miami, FL 33125",
-//     price: "$547,000",
-//     link: "https://www.zillow.com/homedetails/2200-SW-24th-Ter-Miami-FL-33145/43855133_zpid",
-//     zpid: "zpid_43824581",
-//   },
-//   {
-//     address: "1849 NW 35th St, Miami, FL 33142",
-//     price: "$945,000",
-//     link: "https://www.zillow.com/homedetails/750-NE-64th-St-APT-B201-Miami-FL-33138/64769520_zpid",
-//     zpid: "zpid_2070160665",
-//   },
-// ];
+const sampleData = [
+  {
+    address: "14944 SW 132nd Ave, Miami, FL 33186",
+    price: 399444,
+    link: "https://www.zillow.com/homedetails/495-Brickell-Ave-APT-2511-Miami-FL-33131/92440680_zpid",
+    zpid: "zpid_44331199",
+  },
+  {
+    address: "801 NW 17th Ct, Miami, FL 33125",
+    price: 399444,
+    link: "https://www.zillow.com/homedetails/2200-SW-24th-Ter-Miami-FL-33145/43855133_zpid",
+    zpid: "zpid_43824581",
+  },
+  {
+    address: "1849 NW 35th St, Miami, FL 33142",
+    price: 399444,
+    link: "https://www.zillow.com/homedetails/750-NE-64th-St-APT-B201-Miami-FL-33138/64769520_zpid",
+    zpid: "zpid_2070160665",
+  },
+];
