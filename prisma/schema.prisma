@@ -1,31 +1,24 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
-
-model Property { 
-  id          Int @id @default(autoincrement())
-  address     String
-  price       Int
-  zpid        String @unique
-  link        String
-  image       Images[]
+model Property {
+  id      Int      @id @default(autoincrement())
+  address String
+  price   String
+  zpid    String   @unique
+  link    String
+  image   Images[]
 }
 
 model Images {
-  id          Int @id @default(autoincrement())
-  image       Property @relation(fields: [propertyID], references: [id])
-  propertyID     Int
-  imageURL    String @unique
-  
+  id         Int      @id @default(autoincrement())
+  propertyID Int
+  imageURL   String   @unique
+  image      Property @relation(fields: [propertyID], references: [id])
 }
-
-

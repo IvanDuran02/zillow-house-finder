@@ -32,6 +32,7 @@ const locations = [
   "palm-beach",
 ];
 
+// some houses will have no address, to deal with that I made this function to work around it.
 const formatAddr = (data: any, i: number) => {
   // cut the undisclosed address from the address so that we can construct the image url
   const undisclosedAddress = data[i].address.replace(
@@ -62,10 +63,12 @@ async function getProperty(location: string) {
   const links: any = [];
 
   $(".list-card").each((i, element) => {
+    console.log("pushing property data...");
     const address = $(element).find(".list-card-addr").text();
     const priceTemp = $(element).find(".list-card-price").text();
     const zpid = $(element).attr("id");
     // turns price into a number
+    // this removes the price formats so that it is a Int value, you can remove this if you want formated currency.
     const price1 = priceTemp.replace(/\$/g, "");
     const price2 = price1.replace(/\,/g, "");
     const price3 = price2.replace(/\C/g, "");
@@ -74,6 +77,8 @@ async function getProperty(location: string) {
   });
   data.pop(); // remove the last element of the array, for some reason last element is empty
 
+  // to grab the images for the houses we scraped we need to visit their personal links
+  // this formats imformation to find the link for the property so it can be used to find images.
   for (let i = 0; i < data.length; i++) {
     if (data[i].address.startsWith("(undisclosed Address),")) {
       formatted.push(await formatAddr(data, i)); // format the undisclosed address
@@ -89,13 +94,16 @@ async function getProperty(location: string) {
       `https://www.zillow.com/homedetails/${formatted[i]}/${zpidID}_zpid`
     );
   }
+  console.log("formatted links");
+  console.log(data);
 
+  // merges the links into the data array
   data.forEach(
     (property: any, index: number) => (property.link = links[index])
-  ); // merges the links into the data array
+  );
 
+  // ... you will write your Prisma Client queries here
   async function main() {
-    // ... you will write your Prisma Client queries here
     data.forEach(async (property: any, index: number) => {
       const images: any = [];
       const fetchImageUrl = await fetch(property.link);
@@ -141,6 +149,7 @@ async function getProperty(location: string) {
               }
             }
           });
+        console.log("pushed to DB");
       } catch (error) {
         console.log(error);
         // properties have to be unique
@@ -172,29 +181,31 @@ async function getProperty(location: string) {
 
 // testFunction();
 
+// this will input all different cities in the location array
 for (let i = 0; i < locations.length; i++) {
   getProperty(locations[i]);
 }
 
+// console.log(getProperty("miami"));
 // sample data
 
-const sampleData = [
-  {
-    address: "14944 SW 132nd Ave, Miami, FL 33186",
-    price: 399444,
-    link: "https://www.zillow.com/homedetails/495-Brickell-Ave-APT-2511-Miami-FL-33131/92440680_zpid",
-    zpid: "zpid_44331199",
-  },
-  {
-    address: "801 NW 17th Ct, Miami, FL 33125",
-    price: 399444,
-    link: "https://www.zillow.com/homedetails/2200-SW-24th-Ter-Miami-FL-33145/43855133_zpid",
-    zpid: "zpid_43824581",
-  },
-  {
-    address: "1849 NW 35th St, Miami, FL 33142",
-    price: 399444,
-    link: "https://www.zillow.com/homedetails/750-NE-64th-St-APT-B201-Miami-FL-33138/64769520_zpid",
-    zpid: "zpid_2070160665",
-  },
-];
+// const sampleData = [
+//   {
+//     address: "14944 SW 132nd Ave, Miami, FL 33186",
+//     price: 399444,
+//     link: "https://www.zillow.com/homedetails/495-Brickell-Ave-APT-2511-Miami-FL-33131/92440680_zpid",
+//     zpid: "zpid_44331199",
+//   },
+//   {
+//     address: "801 NW 17th Ct, Miami, FL 33125",
+//     price: 399444,
+//     link: "https://www.zillow.com/homedetails/2200-SW-24th-Ter-Miami-FL-33145/43855133_zpid",
+//     zpid: "zpid_43824581",
+//   },
+//   {
+//     address: "1849 NW 35th St, Miami, FL 33142",
+//     price: 399444,
+//     link: "https://www.zillow.com/homedetails/750-NE-64th-St-APT-B201-Miami-FL-33138/64769520_zpid",
+//     zpid: "zpid_2070160665",
+//   },
+// ];
