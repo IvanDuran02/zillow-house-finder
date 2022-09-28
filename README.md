@@ -8,4 +8,4 @@ The problems I ran into making this code have to do with zillows infinite scroll
 
 Another problem is that zillow constantly changes css class names and encrypts class names making it difficult to grab certain information. currently if you want to use this code for yourself it WILL NOT WORK. you would need to update the code with the new class names.
 
-After scraping data for about 200 houses I stored them in a sqlite database using prisma.io as my ORM. (the sqlite file is included in the code)
+After scraping data for about 200 houses I stored them in a sqlite database using prisma.io as my ORM.
